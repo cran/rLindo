@@ -1,0 +1,219 @@
+\documentclass[a4paper]{scrartcl}
+\usepackage{hyperref}
+
+\begin{document}
+\title{A Quick Start for The R Interface to\\ LINDO API}
+%\VignetteIndexEntry{A Quick Start for The R Interface to LINDO API}
+
+\maketitle
+
+\section{Introduction}
+The package \textit{rLindo} is an R interface to LINDO API C functions. It supports 
+Linear, Integer, Quadratic, Conic, General Nonlinear, Global, and Stochastic models.\\
+
+\section{Installation}
+To install the package, it requires the installation of LINDO API 8.0 as well. See file INSTALL for details of the
+installation and platform specifications.\\
+
+\section{Usage}
+To use the package users must have a valid license file named lndapi80.lic under the folder LINDOAPI\_HOME/license. The R interface function names use the convention of 'r' + name of LINDO API function, 
+e.g. \textit{rLScreateEnv} in the R interface corresponds to \textit{LScreateEnv} in LINDO API.
+All LINDO parameters and constants are the same with LINDO API.\\
+
+\section{General commands}
+To load the package, use the command:
+<<>>=
+library(rLindo)
+@
+
+To generate a LINDO API environment object, use the command:
+<<>>=
+rEnv <- rLScreateEnv()
+@
+
+To generate a LINDO API model object, use the command:
+<<>>=
+rModel <- rLScreateModel(rEnv)
+@
+   
+
+\section{An application to the least absolute deviations estimation}
+\subsection{Least absolute deviations (LAD) estimation}
+Let\\
+$n =$ number of observations,\\
+$k =$ number of explanatory variables,\\
+$d_{i} =$ value of the dependent variable in observation $i$, for $i = 1,2,...,n$,\\
+$e_{ij} =$ value of the $j$th independent variable in observation $i$, for $i = 1,2,...,n$ and $j = 1,2,...,k$,\\
+$x_{j} =$ prediction coefficient applied to the $j$th explanatory variable,\\
+$\omega_{i} =$ error of the forecast formula applied to the $i$th observation,\\
+
+A LAD regression can be described as the following:\\
+\vspace{1em}
+\noindent
+\hspace{.5in} Minimize
+\[
+|\omega_{1}| + |\omega_{2}| + |\omega_{3}| + ... + |\omega_{n}|
+\]
+\hspace{.5in} subject to
+\[
+\omega_{i} = d_{i} - x_{0} - \sum_{j=1}^k e_{ij}x_{j}
+\]
+where $\omega_{j}$, $x_{j}$ are unconstrained in sign.
+
+Linear programming can be applied to this problem if we define:
+\[
+ u_{i} - v_{i} = \omega_{i}
+\]
+then the LAD regression model can be rewritten as:\\
+\vspace{1em}
+\noindent
+\hspace{.5in} Minimize
+\[
+u_1 + v_1 + u_2 + v_2 + ... + u_n + v_n
+\]
+\hspace{.5in} subject to
+\[
+u_{i} - v_{i} = d_{i} - x_{0} - \sum_{j=1}^k e_{ij}x_{j}
+\]
+where $u_{i}$ and $v_{i}$ are nonnegative, $x_{j}$ are unconstrained in sign.\\
+
+\subsection{An example}
+We have five observations on a single explanatory variable,\\
+
+\begin{tabular}{cc}
+$d_{i}$ & $e_{i1}$ \\ \hline
+2 & 1 \\
+3 & 2 \\
+4 & 4 \\
+5 & 6 \\
+8 & 7 \\
+\end{tabular}\\
+
+Then the linear programming model for the LAD regression is:\\
+\vspace{1em}
+\noindent
+\hspace{.5in} Minimize
+\[
+U_{1} + V_{1} + U_{2} + V_{2} + U_{3} + V_{3} + U_{4} + V_{4} + U_{5} + V_{5} 
+\]
+\hspace{.5in} subject to
+\[
+U_{1} - V_{1} = 2 - X_{0} - X_{1}
+\]
+\[
+U_{2} - V_{2} = 3 - X_{0} - 2X_{1}
+\]
+\[
+U_{3} - V_{3} = 4 - X_{0} - 4X_{1}
+\]
+\[
+U_{4} - V_{4} = 5 - X_{0} - 6X_{1}
+\]
+\[
+U_{5} - V_{5} = 8 - X_{0} - 7X_{1}
+\]
+All variables are nonnegative.
+
+\subsection{Solve the linear programming model in R}
+Using the R interface to LINDO API, we can solve the above linear programming model.\\
+
+\#load the package
+<<>>=
+library(rLindo)
+@
+\#create LINDO enviroment object
+<<>>=
+rEnv <- rLScreateEnv()
+@
+\#create LINDO model object
+<<>>=
+rModel <- rLScreateModel(rEnv)
+@
+\#disable printing log
+<<>>=
+rLSsetPrintLogNull(rModel)
+@
+\#number of variables
+<<>>=
+nVars <- 12
+@
+\#number of constraints
+<<>>=
+nCons <- 5
+@
+\#maximize or minimize the objective function
+<<>>=
+nDir <- LS_MIN
+@
+\#objective constant
+<<>>=
+dObjConst <- 0.
+@
+\#objective coefficients
+<<>>=
+adC <- c(1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 0., 0.)
+@
+\#right hand side coefficients of the constraints
+<<>>=
+adB <- c( 2., 3., 4., 5., 8.)
+@
+\#constraint types are all Equality
+<<>>=
+acConTypes <- "EEEEE"
+@
+\#number of nonzeros in LHS of the constraints
+<<>>=
+nNZ <- 20
+@
+\#index of the first nonzero in each column
+<<>>=
+anBegCol <- c( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20)
+@
+\#nonzero coefficients of the constraint matrix by column
+<<>>=
+adA <- c(1.0,-1.0,1.0,-1.0,1.0,-1.0,1.0,-1.0,1.0,-1.0,
+         1.0,1.0,1.0,1.0,1.0,1.0,2.0,4.0,6.0,7.0)
+@
+\#row indices of the nonzeros in the constraint matrix by column
+<<>>=
+anRowX <- c(0,0,1,1,2,2,3,3,4,4,0,1,2,3,4,0,1,2,3,4)
+@
+\#lower bound of each variable (X0 and X1 are unconstrained)
+<<>>=
+pdLower <- c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -LS_INFINITY, -LS_INFINITY)
+@
+\#load the data into the model object
+<<>>=
+rLSloadLPData(rModel, nCons, nVars, nDir, dObjConst, adC, adB, acConTypes, 
+              nNZ, anBegCol, NULL, adA, anRowX, pdLower, NULL)
+@
+\#solve the model.
+<<>>=
+rLSoptimize(rModel,LS_METHOD_FREE)
+@
+\#retrieve value of the objective and display it
+<<>>=
+rLSgetDInfo(rModel,LS_DINFO_POBJ)
+@
+\#get primal solution and display it
+<<>>=
+rLSgetPrimalSolution(rModel)
+@
+\#get dual solution and display it
+<<>>=
+rLSgetDualSolution(rModel)
+@
+\#delete enviroment and model objects to free memory
+<<>>=
+rLSdeleteModel(rModel)
+rLSdeleteEnv(rEnv)
+@
+
+
+Then the optimal value for $X_{0}$ and $X_{1}$ specify the prediction formula:
+\[
+d_{i} = 1.3333 + 0.666667e_{i1}
+\]
+
+
+\end{document}

@@ -1,0 +1,3 @@
+The R Interface to LINDO API, version 8.0.1.
+
+To use this package, users must have the installation of LINDO API 8.0 associated with a valid license file and set up the LINDOAPI_HOME environment variable, for details see INSTALL.

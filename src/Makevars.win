@@ -1,0 +1,7 @@
+PKG_CPPFLAGS = -g -D_LINDO_DLL_ -I"${LINDOAPI_HOME}/include" 
+
+ifeq "$(WIN)" "64"
+PKG_LIBS = -L"${LINDOAPI_HOME}/bin/win64" -llindo64_8_0 -Wl,--enable-stdcall-fixup
+else
+PKG_LIBS = -L"${LINDOAPI_HOME}/bin/win32" -llindo8_0 -Wl,--enable-stdcall-fixup
+endif

@@ -1,0 +1,50 @@
+rLindo - The R interface to LINDO API
+
+Before install the rLindo package, following steps have to be done:
+1. Download and install LINDO API 8.0.
+2. Download and install R.
+3. Windows users also need to intall the R tool set. For details, please refer to 
+   http://www.cran.r-project.org/doc/manuals/R-admin.html#The-Windows-toolset.
+
+
+*******************Installation for Windows*******************
+NOTE: Make sure to run the command window as administrator to perform these steps.
+
+1. Check whether environment variable LINDOAPI_HOME has been set to the installation path of LINDO API. If not, please set it. e.g.
+   
+   > set LINDOAPI_HOME="c:\lindoapi"
+
+2. Navigate to the directory where the file rLindo_8.0.1.tar.gz is located.
+
+3. Use the following command sentence to install the rLindo package.
+
+   > R CMD INSTALL rLindo_8.0.1.tar.gz
+
+4. Test whether rLindo package has been installed successfully by using the following command in R.
+
+   > library(rLindo)
+
+
+*******************Installation for Linux*******************
+NOTE: Make sure to login as the 'root' user to perform these steps.
+
+1. Set environment variable LINDOAPI_HOME to the installation path of LINDO API. e.g. 
+      
+   $export LINDOAPI_HOME="/opt/lindoapi"
+   
+   To automatically set this variable, please add the above sentence to the ~/.bashrc file.
+
+2. Navigate to the directory where the file rLindo_8.0.1.tar.gz is located.
+
+3. Install the package using the following command:
+     
+   $R CMD INSTALL rLindo_8.0.1.tar.gz
+
+4. Test whether rLindo package has been installed successfully by using the following command in R.
+
+   > library(rLindo)
+
+
+
+
+
